@@ -15,6 +15,7 @@ patchedDependencies:
   '@fortune-sheet/core@1.0.4': 8791a230763dbf853fd65d627c68c31de37209992851377855e16cf08ea70532
   '@fortune-sheet/react@1.0.4': 2932e52e79afcd4ced08cfa123b5eded786c85043da32f622f3e80af6fc96c37
   '@yao-pkg/pkg@6.21.0': 75891fc22b277c145cafeab83e41baf4a70f5b8fe6dc0801c6a0b922d7ee88c7
+  esbuild@0.25.12: 102ad2da419c76f475d1c63d4e63dfecb03d5165f94b4cb143425cd802c137fc
   exceljs@4.4.0: c1bf8ac8f319dab382f08e3a669b715e691d46c703ac5a4163eb383fbedd1d48
   node-pty@1.2.0-beta.15: b40ae545608897914bd25fb009c97eeac478c34e8a910298ddcb01b746534bb0
 
@@ -26384,7 +26385,7 @@ snapshots:
       '@esbuild/win32-ia32': 0.21.5
       '@esbuild/win32-x64': 0.21.5
 
-  esbuild@0.25.12:
+  esbuild@0.25.12(patch_hash=102ad2da419c76f475d1c63d4e63dfecb03d5165f94b4cb143425cd802c137fc):
     optionalDependencies:
       '@esbuild/aix-ppc64': 0.25.12
       '@esbuild/android-arm': 0.25.12
@@ -29579,7 +29580,7 @@ snapshots:
 
   vite@6.4.3(@types/node@22.20.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:
-      esbuild: 0.25.12
+      esbuild: 0.25.12(patch_hash=102ad2da419c76f475d1c63d4e63dfecb03d5165f94b4cb143425cd802c137fc)
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
       postcss: 8.5.15
