@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>super 是什么 & 为什么子类少一个参数</title>
+<style>
+  :root {
+    --bg: #08080c;
+    --surface: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.06);
+    --text: #ededef;
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-tertiary: rgba(255,255,255,0.3);
+    --accent-1: #f59e0b;
+    --accent-2: #ef4444;
+    --accent-gradient: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --green: #34d399;
+    --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+    --font-sans: -apple-system, 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 20px 80px;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-sans); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(660px 400px at 8% -4%, rgba(245,158,11,0.13), transparent 70%),
+      radial-gradient(560px 380px at 94% 8%, rgba(239,68,68,0.09), transparent 70%);
+  }
+  .wrap { max-width: 720px; margin: 0 auto; position: relative; }
+  h1 {
+    font-size: 24px; margin: 0 0 8px; letter-spacing: -0.02em;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { color: var(--text-tertiary); font-size: 13px; font-family: var(--font-mono); margin-bottom: 32px; }
+  h2 { font-size: 16px; margin: 36px 0 14px; font-weight: 600; }
+  h2 span { color: var(--accent-1); font-family: var(--font-mono); font-size: 13px; margin-right: 8px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px; backdrop-filter: blur(12px); margin-bottom: 12px;
+  }
+  pre { margin: 0; font-family: var(--font-mono); font-size: 13.5px; overflow-x: auto; line-height: 1.95; }
+  code { font-family: var(--font-mono); }
+  .kw { color: #f472b6; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cls { color: #fbbf24; }
+  .cmt { color: rgba(255,255,255,0.3); font-style: italic; }
+  .note {
+    border-left: 2px solid var(--accent-1);
+    padding: 2px 0 2px 14px; margin-top: 14px;
+    font-size: 13.5px; color: var(--text-secondary);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  td, th { padding: 10px 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { color: var(--text-tertiary); font-weight: 500; font-size: 12px; }
+  tr:last-child td { border-bottom: none; }
+  .flow {
+    font-family: var(--font-mono); font-size: 13px; line-height: 2.1;
+    color: var(--text-secondary);
+  }
+  .flow b { color: var(--accent-1); }
+  .flow .hl { color: var(--green); }
+  .punch {
+    border: 1px solid rgba(245,158,11,0.35);
+    background: linear-gradient(180deg, rgba(245,158,11,0.07), rgba(239,68,68,0.04));
+    border-radius: var(--radius); padding: 18px 20px; font-size: 14.5px;
+  }
+  .punch strong { color: var(--accent-1); }
+  @media (max-width: 480px) {
+    body { padding: 28px 14px 60px; }
+    h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><code>super</code> 是什么，以及为什么子类「少一个参数」</h1>
+  <p class="sub">你在 service.ts 里找不到 super —— 那是找对了地方，找错了对象。</p>
+
+  <h2><span>01</span>结论：<code>super</code> 不是「东西」，是「关键字」</h2>
+  <div class="card">
+    <p style="margin:0; font-size:14px">你去 <code>vendor/cordis/src/service.ts</code> 里找 <code>super</code> 的定义，找不到。</p>
+    <div class="note">
+      <b>那里面本来就没有。</b><br><br>
+      <code>super</code> 是 <b>JavaScript 语言本身的关键字</b>，和 <code>if</code>、<code>return</code>、<code>class</code> 是同一类东西。<br>
+      你不会去找 <code>if</code> 的定义，同理也不用找 <code>super</code> 的——它<b>不是谁写的函数</b>，是语言规定好的语法。<br><br>
+      它的含义固定不变：<br>
+      <b>在子类的构造函数里，<code>super(...)</code> = 调用父类的构造函数。</b>
+    </div>
+  </div>
+
+  <h2><span>02</span>一个最小例子（先离开 dsh）</h2>
+  <div class="card">
+    <pre><code><span class="kw">class</span> <span class="cls">动物</span> {
+  <span class="fn">constructor</span>(名字) {
+    <span class="kw">this</span>.名字 = 名字
+  }
+}
+
+<span class="kw">class</span> <span class="cls">猫</span> <span class="kw">extends</span> <span class="cls">动物</span> {
+  <span class="fn">constructor</span>() {
+    <span class="kw">super</span>(<span class="str">'猫'</span>)          <span class="cmt">// ← 调用父类构造函数，把 '猫' 传上去</span>
+  }
+}
+
+<span class="kw">new</span> <span class="cls">猫</span>().名字            <span class="cmt">// → "猫"</span></code></pre>
+    <div class="note">
+      注意三件事：<br>
+      ① <code>猫</code> 的构造函数<b>不收参数</b>——因为它自己知道该叫什么<br>
+      ② <code>super('猫')</code> 把"名字"<b>转交给父类</b>去处理<br>
+      ③ 父类的 <code>constructor(名字)</code> 收到 <code>'猫'</code>，执行 <code>this.名字 = '猫'</code>
+    </div>
+  </div>
+
+  <h2><span>03</span>映射回 dsh：一模一样的结构</h2>
+  <div class="card">
+    <table>
+      <tr><th>你的最小例子</th><th>dsh 里</th></tr>
+      <tr><td><code>class 动物</code></td><td><code>class Service</code>（<code>vendor/cordis/src/service.ts</code>）</td></tr>
+      <tr><td><code>constructor(名字) { this.名字 = 名字 }</code></td><td><code>constructor(ctx, name) { ... provide(name, self) }</code></td></tr>
+      <tr><td><code>class 猫 extends 动物</code></td><td><code>class FileSystem extends Service</code></td></tr>
+      <tr><td><code>constructor() { super('猫') }</code></td><td><code>constructor(ctx) { super(ctx, 'fs') }</code></td></tr>
+    </table>
+    <div class="note">
+      结构完全一样。<b>你发现的那个"少一个参数"，就是这么来的。</b>
+    </div>
+  </div>
+
+  <h2><span>04</span>参数是怎么流的</h2>
+  <div class="card">
+    <div class="flow">
+      <span class="hl">packages/fs/fs/src/index.ts</span><br>
+      &nbsp;&nbsp;<b>constructor(ctx)</b> &nbsp;<span class="cmt">← 子类只收 1 个参数</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;└─ <b>super(ctx, 'fs')</b> &nbsp;<span class="cmt">← 自己补上第 2 个（写死的名字）</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      <span class="hl">vendor/cordis/src/service.ts</span><br>
+      &nbsp;&nbsp;<b>constructor(ctx, name)</b> &nbsp;<span class="cmt">← 父类收 2 个</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;└─ ctx.reflect.<b>provide</b>(name, self, ...) &nbsp;<span class="cmt">★ 登记发生在这里</span>
+    </div>
+    <div class="note">
+      <b><code>FileSystem</code> 不需要问别人"我叫什么"——它自己知道它叫 <code>fs</code>。</b><br>
+      所以它只要求外面给它一个 <code>ctx</code>，名字那一格它自己填。
+    </div>
+  </div>
+
+  <div class="punch">
+    <strong>于是那句话终于落地了：「只有 <code>Service</code> 的子类能登记」</strong><br><br>
+    这不是一条规矩，是一条<b>路径</b>：<br><br>
+    <span style="font-family:var(--font-mono); font-size:13px; line-height:2">
+      你想登记<br>
+      &nbsp;&nbsp;↓<br>
+      必须执行 <code>ctx.reflect.provide(...)</code><br>
+      &nbsp;&nbsp;↓<br>
+      这行只写在 <code>Service</code> 的构造函数里<br>
+      &nbsp;&nbsp;↓<br>
+      想跑到它，只能 <code>extends Service</code> 然后 <code>super(...)</code><br>
+      &nbsp;&nbsp;↓<br>
+      <b>所以函数做不到</b>——函数没有父类，也就没有 <code>super</code>
+    </span>
+  </div>
+</div>
+</body>
+</html>

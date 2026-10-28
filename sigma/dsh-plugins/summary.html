@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学习复盘 · DSH 插件</title>
+<style>
+  :root {
+    --bg: #08080c;
+    --surface: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.06);
+    --text: #ededef;
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-tertiary: rgba(255,255,255,0.3);
+    --accent-1: #f59e0b;
+    --accent-2: #ef4444;
+    --accent-gradient: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --green: #34d399;
+    --amber: #fbbf24;
+    --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+    --font-sans: -apple-system, 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 20px 80px;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-sans); line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(680px 420px at 12% -4%, rgba(245,158,11,0.13), transparent 70%),
+      radial-gradient(560px 380px at 92% 8%, rgba(239,68,68,0.10), transparent 70%),
+      radial-gradient(700px 520px at 50% 108%, rgba(52,211,153,0.06), transparent 70%);
+  }
+  .wrap { max-width: 720px; margin: 0 auto; position: relative; }
+  h1 {
+    margin: 0 0 8px; font-size: 28px; letter-spacing: -0.02em;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { color: var(--text-tertiary); font-size: 13px; font-family: var(--font-mono); margin-bottom: 32px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .14em; color: var(--text-tertiary); font-weight: 600; margin: 40px 0 14px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    backdrop-filter: blur(12px);
+  }
+  .stat-num { font-size: 26px; font-weight: 700; font-family: var(--font-mono); letter-spacing: -0.02em; }
+  .stat-num.green { color: var(--green); }
+  .stat-num.amber { color: var(--amber); }
+  .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .stat-note { font-size: 11.5px; color: var(--text-tertiary); margin-top: 8px; }
+  .bars { display: flex; flex-direction: column; gap: 10px; }
+  .brow { display: grid; grid-template-columns: 1fr 46px; align-items: center; gap: 12px; }
+  .bname { font-size: 13px; }
+  .bmeta { font-size: 11px; color: var(--text-tertiary); display: block; margin-top: 1px; }
+  .btrack { height: 4px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .btrack > i { display: block; height: 100%; background: var(--accent-gradient); }
+  .btrack.done > i { background: var(--green); }
+  .btrack.wip > i { background: var(--amber); }
+  .btrack.todo > i { background: rgba(255,255,255,0.12); }
+  .bval { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); text-align: right; }
+  ul { margin: 0; padding-left: 18px; }
+  li { margin-bottom: 10px; font-size: 14px; }
+  li b { color: var(--accent-1); font-weight: 600; }
+  .quote {
+    border-left: 2px solid var(--accent-1); padding: 2px 0 2px 14px;
+    color: var(--text-secondary); font-size: 13.5px; margin: 14px 0;
+  }
+  code { font-family: var(--font-mono); font-size: 0.92em; background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 4px; }
+  pre.code {
+    background: rgba(0,0,0,0.35); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 12.5px;
+    line-height: 1.65; margin: 10px 0;
+  }
+  pre.code .c { color: rgba(255,255,255,0.35); }
+  table.two { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.two th, table.two td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  table.two th { color: var(--text-tertiary); font-weight: 500; font-size: 11.5px; letter-spacing: .05em; }
+  .next { display: flex; flex-direction: column; gap: 10px; }
+  .next div { font-size: 13.5px; color: var(--text-secondary); }
+  .next span { font-family: var(--font-mono); color: var(--accent-1); font-size: 11.5px; margin-right: 8px; }
+  footer { margin-top: 44px; font-size: 11.5px; color: var(--text-tertiary); font-family: var(--font-mono); }
+  @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } body { padding: 28px 14px 60px; } h1 { font-size: 22px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>9 / 14：树是拼出来的</h1>
+  <div class="sub">2026-10-22 13:15–14:12 ／ 第 08 站复检（75%）＋ 第 09 站通过</div>
+
+  <h2>进度</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="stat-num green">9 / 14</div>
+      <div class="stat-label">已掌握概念</div>
+      <div class="stat-note">08 站已掌握；09 站 4/4；10 站 75% 待复检</div>
+    </div>
+    <div class="card">
+      <div class="stat-num amber">3</div>
+      <div class="stat-label">你抓出我的漏洞</div>
+      <div class="stat-note">漏自评 · 漏验书写 · 报错路径（其中一次是事实错误）</div>
+    </div>
+  </div>
+
+  <h2>概念进度</h2>
+  <div class="card bars">
+    <div class="brow"><div><span class="bname">01 dsh 是一棵插件树</span><span class="bmeta">间隔 4d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
+    <div class="brow"><div><span class="bname">02 Context（ctx）：服务容器</span><span class="bmeta">间隔 4d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
+    <div class="brow"><div><span class="bname">03 Plugin 的两种形态</span><span class="bmeta">间隔 2d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
+    <div class="brow"><div><span class="bname">04 inject：依赖决定启动顺序</span><span class="bmeta">间隔 2d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
+    <div class="brow"><div><span class="bname">05 ctx.effect()：可逆副作用</span><span class="bmeta">间隔 2d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
+    <div class="brow"><div><span class="bname">06 类型化事件与声明合并</span><span class="bmeta">间隔 1d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
+    <div class="brow"><div><span class="bname">07 五种分发模式（waterfall）</span><span class="bmeta">间隔 1d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
+    <div class="brow"><div><span class="bname">08 Config：插件的配置契约</span><span class="bmeta">10-23 掌握 · 书写另立训练项</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
+    <div class="brow"><div><span class="bname">09 Profile：插件树如何被组装</span><span class="bmeta">10-22 掌握 · 间隔 1d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
+    <div class="brow"><div><span class="bname">10 组合包 bundle 与 dsh 字段</span><span class="bmeta">自评"发虚"→复查 75%，待复检</span><div class="btrack wip"><i style="width:75%"></i></div></div><div class="bval">75%</div></div>
+  </div>
+
+  <h2>第 09 站：树是怎么拼出来的</h2>
+  <div class="card">
+    <pre class="code">[]                          <span class="c"># cordis.yml —— 空，故意的</span>
+  ↓ dsh-base 自带的 patch
+  ↓ dsh-web-app 自带的 5 份 patch
+  ↓ voice-input 自带的 patch
+  ↓ 你自己的 cordis.patch.yml <span class="c">← 最后贴，所以它说了算</span>
+  = 一棵几百个插件的树</pre>
+    <ul>
+      <li><b>从空开始不是省略，是承诺。</b>你自己的话：「要保证 dsh 一切皆插件，所以该文件是空的」——第 01 站和第 09 站在这里接上了。</li>
+      <li><b>特权的定义：</b>不是"改不改得动"，是"不点名时在不在"。空清单让所有插件都必须被点名。</li>
+      <li><b>后贴的覆盖先贴的</b>（跟 C 的 <code>x = 1; x = 2;</code> 同性质）。所以别改安装目录里那份——升级就没了。</li>
+    </ul>
+  </div>
+
+  <h2>08 和 09 在这里合上了</h2>
+  <div class="card">
+    <ul>
+      <li><code>cordis.patch.yml</code> 是 <b>YAML</b>，TS 的类型检查看不见它。</li>
+      <li>那里面每个 <code>config:</code> 块的唯一关口，是那个插件导出的 <b><code>Config</code> schema</b>。</li>
+      <li>schema 不是表，是<b>校验器</b>：能被调用，干三件事——查类型范围、补默认值、产出干净配置。<code>apply</code> 拿到的是<b>成品</b>。</li>
+      <li>没有 <code>Config</code> = 没有校验器 = <b>静默</b>（跟"没人监听就不报错"同一个形状）。</li>
+    </ul>
+    <div class="quote">一句话：<b>类型管代码，schema 管配置，谁都不管的东西就静默通过。</b></div>
+  </div>
+
+  <h2>还欠着的</h2>
+  <div class="card">
+    <table class="two">
+      <tr><th>欠账</th><th>说明</th></tr>
+      <tr><td>第 08 站书写复测</td><td>写一次完整的 <code>Config</code> + <code>apply(ctx, config)</code>，不加提示</td></tr>
+      <tr><td>第 10 站复检</td><td>包 / 插件 / bundle 三个身份各管什么；bundle 不带自己就不跑</td></tr>
+      <tr><td>引号</td><td>第四次之后终于讲通：<code>sigema/ready</code> 不带引号 = <code>sigema ÷ ready</code>（除号）</td></tr>
+      <tr><td>第 11 站</td><td><code>cordis.yml</code> 与有序 patch 层叠</td></tr>
+    </table>
+  </div>
+
+  <h2>下次接着做</h2>
+  <div class="card next">
+    <div><span>01</span>十秒地基（每次换变体）。</div>
+    <div><span>02</span>第 08 站书写复测：不提示写完 <code>Config</code> 和 <code>apply(ctx, config)</code>。</div>
+    <div><span>03</span>第 10 站：bundle 是什么、<code>dsh</code> 字段怎么声明。</div>
+  </div>
+
+  <footer>sigma · dsh-plugins · 本文件每次暂停或里程碑时重写</footer>
+</div>
+</body>
+</html>

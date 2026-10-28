@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学习路线图 · DSH 插件</title>
+<style>
+  :root {
+    --bg: #08080c;
+    --surface: rgba(255,255,255,0.03);
+    --surface-hover: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.06);
+    --text: #ededef;
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-tertiary: rgba(255,255,255,0.3);
+    --accent-1: #f59e0b;
+    --accent-2: #ef4444;
+    --accent-gradient: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+    --font-sans: -apple-system, 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --radius: 12px;
+    --mastered-pct: 0%;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 48px 20px 80px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(680px 420px at 12% -4%, rgba(245,158,11,0.13), transparent 70%),
+      radial-gradient(560px 380px at 92% 8%, rgba(239,68,68,0.10), transparent 70%),
+      radial-gradient(700px 520px at 50% 108%, rgba(52,211,153,0.06), transparent 70%);
+  }
+  .wrap { max-width: 720px; margin: 0 auto; position: relative; }
+
+  header { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; }
+  .hgroup { flex: 1 1 320px; }
+  h1 {
+    margin: 0 0 10px;
+    font-size: 30px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    backdrop-filter: blur(12px);
+  }
+  .ring { flex: 0 0 auto; position: relative; width: 88px; height: 88px; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 600;
+  }
+  .ring-label small { font-size: 10px; color: var(--text-tertiary); font-weight: 400; letter-spacing: .08em; }
+
+  .lede {
+    color: var(--text-secondary);
+    font-size: 14px;
+    border-left: 2px solid var(--accent-1);
+    padding: 2px 0 2px 14px;
+    margin: 20px 0 36px;
+  }
+
+  .timeline { position: relative; padding-left: 34px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 9px; top: 6px; bottom: 6px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent-2) 0%, var(--accent-1) var(--mastered-pct), var(--border) var(--mastered-pct), var(--border) 100%);
+    border-radius: 2px;
+  }
+  .node { position: relative; margin-bottom: 12px; }
+  .node::before {
+    content: '';
+    position: absolute;
+    left: -31px; top: 20px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    backdrop-filter: blur(12px);
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card:hover { background: var(--surface-hover); transform: translateY(-2px); }
+  .row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .num { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+  .title { font-size: 15px; font-weight: 600; flex: 1 1 auto; }
+  .badge {
+    font-size: 10.5px; font-family: var(--font-mono);
+    padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-tertiary);
+    white-space: nowrap;
+  }
+  .score { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+  .prereq { font-size: 12px; color: var(--text-tertiary); margin-top: 6px; }
+  .bar { height: 3px; border-radius: 3px; background: rgba(255,255,255,0.07); margin-top: 10px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent-gradient); border-radius: 3px; transition: width .5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+  .node.not-started .card { opacity: .45; }
+  .node.in-progress .card { border-color: rgba(245,158,11,0.5); box-shadow: 0 0 0 1px rgba(245,158,11,0.12), 0 8px 30px -12px rgba(245,158,11,0.5); }
+  .node.in-progress::before { border-color: var(--accent-1); background: var(--accent-1); animation: pulse 2s ease-in-out infinite; }
+  .node.in-progress .badge { color: var(--accent-1); border-color: rgba(245,158,11,0.4); }
+  .node.mastered .card { border-color: rgba(52,211,153,0.35); }
+  .node.mastered::before { border-color: var(--green); background: var(--green); }
+  .node.mastered .badge { color: var(--green); border-color: rgba(52,211,153,0.4); }
+  .node.mastered .bar > i { background: var(--green); }
+  .node.mastered .score { color: var(--green); }
+  .current-tag {
+    position: absolute; right: 14px; top: -9px;
+    font-size: 10px; font-family: var(--font-mono);
+    color: #1a0f00; background: var(--accent-gradient);
+    padding: 2px 8px; border-radius: 999px;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+  }
+
+  footer { margin-top: 36px; }
+  .fbar { height: 6px; border-radius: 6px; background: rgba(255,255,255,0.06); overflow: hidden; }
+  .fbar > i { display: block; height: 100%; width: 0; background: var(--accent-gradient); transition: width .6s cubic-bezier(0.4, 0, 0.2, 1); }
+  .fmeta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-tertiary); margin-top: 10px; font-family: var(--font-mono); }
+
+  @media (max-width: 480px) {
+    body { padding: 28px 14px 60px; }
+    h1 { font-size: 24px; }
+    .ring { width: 72px; height: 72px; }
+    .timeline { padding-left: 26px; }
+    .node::before { left: -23px; }
+  }
+</style>
+</head>
+<body>
+<svg style="position:absolute;width:0;height:0">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--accent-1)"/>
+      <stop offset="100%" stop-color="var(--accent-2)"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header>
+    <div class="hgroup">
+      <h1>DSH 插件：从架构到能跑起来</h1>
+      <div class="chips">
+        <span class="chip">中文</span>
+        <span class="chip">起点：零基础</span>
+        <span class="chip">目标：写出并挂载插件</span>
+        <span class="chip">14 个概念</span>
+      </div>
+    </div>
+    <div class="ring">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle cx="44" cy="44" r="38" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/>
+        <circle cx="44" cy="44" r="38" fill="none" stroke="url(#gradient)" stroke-width="6" stroke-linecap="round"
+                stroke-dasharray="238.76" stroke-dashoffset="238.76" id="ringProgress"/>
+      </svg>
+      <div class="ring-label"><span id="pctText">0%</span><small>掌握度</small></div>
+    </div>
+  </header>
+
+  <p class="lede">路线按依赖排序：先建立「dsh 是什么」的地图，再逐一拆开插件的机制，第 12 站把它们合起来跑通，最后回到架构层看扩展点。</p>
+
+  <div class="timeline" id="timeline"></div>
+
+  <footer>
+    <div class="fbar"><i id="footerBar"></i></div>
+    <div class="fmeta"><span id="footerLeft">0 / 14 已掌握</span><span>最后更新 2026-10-18 23:40</span></div>
+  </footer>
+</div>
+
+<script>
+const concepts = [
+  { n: 1,  title: 'dsh 是一棵插件树（没有特权内核）', pre: '起点 · 2026-10-18 复习：4 轮脚手架后自主收口 · 间隔 4d', status: 'mastered', score: 100 },
+  { n: 2,  title: 'Context（ctx）：服务容器', pre: '依赖 1 · 2026-10-19 复习通过 · 间隔 4d', status: 'mastered', score: 100 },
+  { n: 3,  title: 'Plugin 的两种形态与最小插件', pre: '依赖 2 · 2026-10-19 复习：形态判据 ✓ · 混淆"用 ctx"与"占格子" · 间隔 2d', status: 'mastered', score: 100 },
+  { n: 4,  title: 'inject：依赖声明决定启动顺序', pre: '依赖 3 · 2026-10-19 复习通过（重启时机一度答错，靠自身前提自行收回）· 间隔 2d', status: 'mastered', score: 100 },
+  { n: 5,  title: 'ctx.effect()：注册即可逆副作用', pre: '依赖 3 · 2026-10-19 复习通过（中途重补"造函数≠调用函数"）· 间隔 2d', status: 'mastered', score: 100 },
+  { n: 6,  title: '类型化事件与声明合并', pre: '依赖 3 · 2026-10-20 掌握 · 4/4（C 版分发器焊死运行时那一层）· 间隔 1d', status: 'mastered', score: 100 },
+  { n: 7,  title: '五种分发模式（waterfall 的 next 契约）', pre: '依赖 6 · 2026-10-20 掌握 · 4/4（next = 交棒；不调即短路）· 间隔 1d', status: 'mastered', score: 100 },
+  { n: 8,  title: 'Config：插件的配置契约', pre: '依赖 3 · 2026-10-23 掌握（概念全通；书写单列训练）· 间隔 2d', status: 'mastered', score: 100 },
+  { n: 9,  title: 'Profile：插件树如何被组装', pre: '依赖 1, 4 · 2026-10-22 掌握 · 4/4（空起点 = 一切皆插件）· 间隔 1d', status: 'mastered', score: 100 },
+  { n: 10, title: '组合包 bundle 与 package.json 的 dsh 字段', pre: '依赖 9 · 2026-10-23 自评"发虚"→复查 3/4 = 75%，待复检', status: 'in-progress', score: 75 },
+  { n: 11, title: 'cordis.yml 与有序 patch 层叠', pre: '依赖 8, 10', status: 'not-started', score: null },
+  { n: 12, title: '动手：写插件 → 配置 → 挂载运行', pre: '依赖 3, 4, 5, 8, 11', status: 'not-started', score: null },
+  { n: 13, title: '事件域：session / agent / 能力事件', pre: '依赖 6, 7, 12', status: 'not-started', score: null },
+  { n: 14, title: '能力 seam 三角与替换提供方', pre: '依赖 2, 13', status: 'not-started', score: null }
+];
+
+const label = { 'not-started': '未开始', 'in-progress': '进行中', 'mastered': '已掌握' };
+const current = concepts.find(c => c.status === 'in-progress');
+const tl = document.getElementById('timeline');
+tl.innerHTML = concepts.map(c => `
+  <div class="node ${c.status}">
+    <div class="card">
+      ${c === current ? '<span class="current-tag">当前</span>' : ''}
+      <div class="row">
+        <span class="num">${String(c.n).padStart(2, '0')}</span>
+        <span class="title">${c.title}</span>
+        <span class="badge">${label[c.status]}</span>
+        ${c.score !== null ? `<span class="score">${c.score}%</span>` : ''}
+      </div>
+      <div class="prereq">${c.pre}</div>
+      <div class="bar"><i style="width:${c.score ?? 0}%"></i></div>
+    </div>
+  </div>
+`).join('');
+
+const mastered = concepts.filter(c => c.status === 'mastered').length;
+const pct = Math.round(mastered / concepts.length * 100);
+const C = 2 * Math.PI * 38;
+document.getElementById('ringProgress').setAttribute('stroke-dashoffset', C * (1 - pct / 100));
+document.getElementById('pctText').textContent = pct + '%';
+document.getElementById('timeline').style.setProperty('--mastered-pct', pct + '%');
+document.getElementById('footerBar').style.width = pct + '%';
+document.getElementById('footerLeft').textContent = `${mastered} / ${concepts.length} 已掌握`;
+</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>类 vs 对象 vs 继承</title>
+<style>
+  :root {
+    --bg: #08080c;
+    --surface: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.06);
+    --text: #ededef;
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-tertiary: rgba(255,255,255,0.3);
+    --accent-1: #f59e0b;
+    --accent-2: #ef4444;
+    --accent-gradient: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --green: #34d399;
+    --blue: #7dd3fc;
+    --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+    --font-sans: -apple-system, 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 20px 80px;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-sans); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(660px 400px at 8% -4%, rgba(245,158,11,0.13), transparent 70%),
+      radial-gradient(560px 380px at 94% 8%, rgba(239,68,68,0.09), transparent 70%);
+  }
+  .wrap { max-width: 720px; margin: 0 auto; position: relative; }
+  h1 {
+    font-size: 25px; margin: 0 0 8px; letter-spacing: -0.02em;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { color: var(--text-tertiary); font-size: 13px; font-family: var(--font-mono); margin-bottom: 32px; }
+  h2 { font-size: 16px; margin: 36px 0 14px; font-weight: 600; }
+  h2 span { color: var(--accent-1); font-family: var(--font-mono); font-size: 13px; margin-right: 8px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px; backdrop-filter: blur(12px); margin-bottom: 12px;
+  }
+  pre { margin: 0; font-family: var(--font-mono); font-size: 13.5px; overflow-x: auto; line-height: 1.95; }
+  code { font-family: var(--font-mono); }
+  .kw { color: #f472b6; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cls { color: #fbbf24; }
+  .cmt { color: rgba(255,255,255,0.3); font-style: italic; }
+  .note {
+    border-left: 2px solid var(--accent-1);
+    padding: 2px 0 2px 14px; margin-top: 14px;
+    font-size: 13.5px; color: var(--text-secondary);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  td, th { padding: 10px 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { color: var(--text-tertiary); font-weight: 500; font-size: 12px; }
+  tr:last-child td { border-bottom: none; }
+  .tree { font-family: var(--font-mono); font-size: 14px; line-height: 2.2; }
+  .tree .c { color: var(--accent-1); }
+  .tree .up { color: var(--text-tertiary); }
+  .steps { counter-reset: s; }
+  .step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; font-size: 13.5px; }
+  .step:last-child { margin-bottom: 0; }
+  .step::before {
+    counter-increment: s; content: counter(s);
+    flex: 0 0 24px; height: 24px; border-radius: 50%;
+    border: 1px solid rgba(245,158,11,0.5); color: var(--accent-1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+  .punch {
+    border: 1px solid rgba(245,158,11,0.35);
+    background: linear-gradient(180deg, rgba(245,158,11,0.07), rgba(239,68,68,0.04));
+    border-radius: var(--radius); padding: 18px 20px; font-size: 14.5px;
+  }
+  .punch strong { color: var(--accent-1); }
+  @media (max-width: 480px) {
+    body { padding: 28px 14px 60px; }
+    h1 { font-size: 20px; }
+    td { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>类 vs 对象 vs 继承</h1>
+  <p class="sub">你这三个问题问到地基了。这一页是整个 DSH 插件体系里最基础的一块砖。</p>
+
+  <h2><span>01</span>两个世界</h2>
+  <div class="card">
+    <table>
+      <tr><th></th><th>类（class）</th><th>对象（object / 实例）</th></tr>
+      <tr><td>是什么</td><td><b>模具</b>、模板、图纸</td><td><b>模具压出来的产品</b></td></tr>
+      <tr><td>住在哪</td><td>源码里（<code>.ts</code> 文件的一段定义）</td><td>内存里（程序跑起来之后才有）</td></tr>
+      <tr><td>有几个</td><td>写一次就一个</td><td>想要几个造几个</td></tr>
+      <tr><td>怎么来</td><td><code>class X { }</code></td><td><code>new X()</code></td></tr>
+      <tr><td>dsh 里的例子</td><td><code>LocalFileSystem</code></td><td><code>ctx.fs</code> 格子里那个东西</td></tr>
+    </table>
+    <div class="note">
+      <b>模具压完还在。</b><code>new</code> 不会消耗掉类——你可以用同一个类 <code>new</code> 出无数个对象。
+    </div>
+  </div>
+
+  <h2><span>02</span>继承只发生在「类」和「类」之间</h2>
+  <div class="card">
+    <div class="tree">
+      <span class="c">Service</span> &nbsp;<span class="cmt">← 类（框架给的）</span><br>
+      &nbsp;&nbsp;<span class="up">↑ extends</span><br>
+      <span class="c">FileSystem</span> &nbsp;<span class="cmt">← 类（说明书）</span><br>
+      &nbsp;&nbsp;<span class="up">↑ extends</span><br>
+      <span class="c">LocalFileSystem</span> &nbsp;<span class="cmt">← 类（实现）</span>
+    </div>
+    <div class="note">
+      <b>这三个全都是类，全都是模具。</b>继承是"模具套模具"——子类模具 = 父类模具 + 自己的补充。<br><br>
+      <b>没有"继承一个对象"这回事。</b>所以 `LocalFileSystem` 不是"子类的对象"，它<b>本身就是一个类</b>，只是这个类的模具是从上面两个模具叠出来的。
+    </div>
+  </div>
+
+  <h2><span>03</span><code>new LocalFileSystem(ctx)</code> 这一下，到底发生了五件事</h2>
+  <div class="card steps">
+    <div class="step">拿 <code>LocalFileSystem</code> 这个模具准备压一个产品。</div>
+    <div class="step">发现它<b>没有自己的构造函数</b>——所以沿用 <code>FileSystem</code> 的。</div>
+    <div class="step"><code>FileSystem</code> 的构造函数第一句是 <code>super(ctx, 'fs')</code>——把活转交给 <code>Service</code>，并且<b>自己填上名字 <code>'fs'</code></b>。</div>
+    <div class="step"><code>Service</code> 的构造函数最后一句 <code>ctx.reflect.provide('fs', self, ...)</code>——<b>把刚造出的对象登记到 ctx 上</b>，然后 <code>return self</code>。</div>
+    <div class="step">于是：<b><code>ctx</code> 上多了一个叫 <code>fs</code> 的格子，格子里放着这个新对象。</b></div>
+  </div>
+
+  <h2><span>04</span>回答你的四个问题</h2>
+  <div class="card">
+    <table>
+      <tr>
+        <td style="width:130px"><b>FileSystem 这个模板呢？</b></td>
+        <td><b>还在。</b>它只是源码里的一个类定义，`new` 不会消耗它。模具压完还在，随时可以再压。（在 dsh 的运行里它通常只被压一次，但语言层面不限制。）</td>
+      </tr>
+      <tr>
+        <td><b>为什么还要加 ctx 参数？</b></td>
+        <td>因为登记要有<b>目的地</b>。一个程序里可能不止一个 ctx（Host 端一棵树、Client 端另一棵）。所以 ctx 不能写死，必须由外面传进来。</td>
+      </tr>
+      <tr>
+        <td><b>名字 name 怎么算？</b></td>
+        <td><b>写死的，不是算出来的。</b>就在 <code>FileSystem</code> 的构造函数里：<code>super(ctx, 'fs')</code>。它把 <code>'fs'</code> 这个字符串直接交给父类。</td>
+      </tr>
+      <tr>
+        <td><b>LocalFileSystem 这个名字在哪？</b></td>
+        <td><b>只在源码里。</b>运行时 ctx 上的格子叫 <code>fs</code>，跟 <code>LocalFileSystem</code> 没有任何关系。这个名字对人（读代码的、看报错的）有用，对"登记"没用。</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="punch">
+    <strong>把这三句话背下来，地基就成了：</strong><br><br>
+    ① <b>类是模具，对象是产品。</b><code>new</code> = 压一次。<br>
+    ② <b>继承发生在类之间</b>，不发生在对象之间。<br>
+    ③ <b>登记的"名字"是写死的字符串</b>（<code>'fs'</code>），和类名、包名都没有关系。
+  </div>
+</div>
+</body>
+</html>

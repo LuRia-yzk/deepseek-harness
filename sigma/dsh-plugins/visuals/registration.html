@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>登记：super(ctx, 'fs') 到底做了什么</title>
+<style>
+  :root {
+    --bg: #08080c;
+    --surface: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.06);
+    --text: #ededef;
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-tertiary: rgba(255,255,255,0.3);
+    --accent-1: #f59e0b;
+    --accent-2: #ef4444;
+    --accent-gradient: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --green: #34d399;
+    --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+    --font-sans: -apple-system, 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 20px 80px;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-sans); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(660px 400px at 8% -4%, rgba(245,158,11,0.13), transparent 70%),
+      radial-gradient(560px 380px at 94% 8%, rgba(239,68,68,0.09), transparent 70%);
+  }
+  .wrap { max-width: 720px; margin: 0 auto; position: relative; }
+  h1 {
+    font-size: 25px; margin: 0 0 8px; letter-spacing: -0.02em;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { color: var(--text-tertiary); font-size: 13px; font-family: var(--font-mono); margin-bottom: 32px; }
+  h2 { font-size: 16px; margin: 36px 0 14px; font-weight: 600; }
+  h2 span { color: var(--accent-1); font-family: var(--font-mono); font-size: 13px; margin-right: 8px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px; backdrop-filter: blur(12px); margin-bottom: 12px;
+  }
+  pre { margin: 0; font-family: var(--font-mono); font-size: 13.5px; overflow-x: auto; line-height: 1.95; }
+  .kw { color: #f472b6; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cls { color: #fbbf24; }
+  .cmt { color: rgba(255,255,255,0.3); font-style: italic; }
+  .note {
+    border-left: 2px solid var(--accent-1);
+    padding: 2px 0 2px 14px; margin-top: 14px;
+    font-size: 13.5px; color: var(--text-secondary);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  td, th { padding: 10px 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { color: var(--text-tertiary); font-weight: 500; font-size: 12px; }
+  tr:last-child td { border-bottom: none; }
+  td .nm { font-family: var(--font-mono); color: var(--green); }
+  td .box { font-family: var(--font-mono); color: var(--accent-1); }
+  .parts { display: flex; flex-direction: column; gap: 12px; }
+  .part { display: flex; gap: 14px; align-items: baseline; }
+  .part code {
+    flex: 0 0 110px; font-family: var(--font-mono); font-size: 14px;
+    color: var(--accent-1); background: rgba(245,158,11,0.08);
+    border-radius: 6px; padding: 2px 8px; text-align: center;
+  }
+  .part .txt { font-size: 13.5px; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .env { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: rgba(255,255,255,0.025); }
+  .env h3 { margin: 0 0 8px; font-size: 12.5px; font-family: var(--font-mono); font-weight: 500; color: var(--text-secondary); }
+  .env p { margin: 0 0 8px; font-size: 13px; color: var(--text-secondary); }
+  .env .path { font-family: var(--font-mono); font-size: 12px; color: var(--green); }
+  .ask {
+    margin-top: 36px; border: 1px solid rgba(245,158,11,0.35);
+    background: linear-gradient(180deg, rgba(245,158,11,0.07), rgba(239,68,68,0.04));
+    border-radius: var(--radius); padding: 18px 20px; font-size: 14.5px;
+  }
+  .ask strong { color: var(--accent-1); }
+  @media (max-width: 480px) {
+    body { padding: 28px 14px 60px; }
+    h1 { font-size: 20px; }
+    .split { grid-template-columns: 1fr; }
+    .part code { flex: 0 0 86px; font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>登记：<code>super(ctx, 'fs')</code> 到底做了什么</h1>
+  <p class="sub">你已经找到"登记"那行代码了。这一页把它拆开，顺便说清 abstract 是什么。</p>
+
+  <h2><span>01</span>ctx 是一张表</h2>
+  <div class="card">
+    <p style="margin:0 0 12px; font-size:13.5px; color:var(--text-secondary)">把 <code>ctx</code> 想成一张两列的表：<b>名字 → 东西</b>。</p>
+    <table>
+      <tr><th>名字（格子）</th><th>里面放着的东西</th></tr>
+      <tr><td class="nm">fs</td><td class="box">一个 FileSystem 对象 —— 会真的读写文件的那个</td></tr>
+      <tr><td class="nm">tools</td><td class="box">工具注册表对象</td></tr>
+      <tr><td class="nm">llm</td><td class="box">模型适配器所在的对象</td></tr>
+      <tr><td class="nm">…</td><td class="box">…</td></tr>
+    </table>
+    <div class="note">
+      注意两列的区别：左列是<b>名字</b>（一段文字），右列是<b>东西</b>（能干活的对象）。<br>
+      <code>ctx.fs</code> 读作"从表里按名字 <code>fs</code> 取出右边那个东西"。
+    </div>
+  </div>
+
+  <h2><span>02</span>拆开这一行</h2>
+  <div class="card">
+    <pre><code><span class="kw">super</span>(ctx, <span class="str">'fs'</span>)</code></pre>
+    <div class="parts" style="margin-top:16px">
+      <div class="part">
+        <code>super</code>
+        <div class="txt">"调用我<b>父类</b>的构造函数"。<code>FileSystem extends Service</code>，所以父类是 <code>Service</code>。真正干登记这件事的代码在 <code>Service</code> 里。</div>
+      </div>
+      <div class="part">
+        <code>ctx</code>
+        <div class="txt">登记到<b>哪张表</b>上。</div>
+      </div>
+      <div class="part">
+        <code>'fs'</code>
+        <div class="txt">用<b>哪个名字</b>挂。<br>
+          <span style="color:var(--text-tertiary)">为什么要加引号？因为它是<b>名字</b>，不是变量。不加引号的 <code>fs</code> 在代码里意思是"某个叫 fs 的变量"；加了引号的 <code>'fs'</code> 意思是"<b>这七个字符本身</b>"，也就是那个格子上的标签。</span></div>
+      </div>
+    </div>
+    <div class="note">
+      整句连起来：<b>把"我"这个对象，以名字 <code>fs</code> 登记到 ctx 这张表上。</b><br>
+      这就是你说的"把名字加到 <code>ctx.</code> 后面"——只不过做这件事的，是对象自己在<b>出生的时候</b>干的。
+    </div>
+  </div>
+
+  <h2><span>03</span>abstract 是什么：说明书 vs 实现</h2>
+  <div class="card">
+    <div class="split">
+      <div class="env">
+        <h3>说明书</h3>
+        <p class="path">packages/fs/fs</p>
+        <pre><code><span class="kw">export abstract class</span> <span class="cls">FileSystem</span> <span class="kw">extends</span> <span class="cls">Service</span> {
+  <span class="kw">abstract</span> <span class="fn">editText</span>(...)
+  <span class="kw">abstract</span> <span class="fn">readText</span>(...)
+}</code></pre>
+        <p style="margin-top:10px">只写"<b>必须要有哪些方法</b>"，<b>不写怎么做</b>。<br>
+        <code>abstract</code> 的意思就是：<b>这里只有约定，没有实现</b>。</p>
+      </div>
+      <div class="env">
+        <h3>实现</h3>
+        <p class="path">packages/fs/fs-local</p>
+        <pre><code><span class="kw">class</span> <span class="cls">LocalFileSystem</span> <span class="kw">extends</span> <span class="cls">FileSystem</span> {
+  <span class="fn">editText</span>(...) {
+    <span class="cmt">// 真的去改磁盘上的文件</span>
+  }
+}</code></pre>
+        <p style="margin-top:10px">真的动手的代码。<br>
+        换一个后端（远程沙箱），只需要<b>另写一份实现</b>，说明书不用动。</p>
+      </div>
+    </div>
+    <div class="note">
+      所以 <code>editText</code> 住在 <code>packages/fs/fs</code> 里，是<b>说明书上的一个条目</b>；<br>
+      而"真正去改文件的那份代码"住在 <code>packages/fs/fs-local</code> 里。
+    </div>
+  </div>
+
+  <h2><span>04</span>消费方怎么用</h2>
+  <div class="card">
+    <pre><code><span class="kw">await</span> ctx.<span class="fn">fs</span>.<span class="fn">editText</span>(...)
+     <span class="cmt">└─┬─┘ └──┬───┘</span>
+       <span class="cmt">│      └─ 调用那个对象上的方法</span>
+       <span class="cmt">└─ 按名字 fs 从表里取出对象</span></code></pre>
+    <div class="note">
+      <code>edit.ts</code> 从没 import 过任何 fs 的<b>实现</b>。它只是按名字取东西——<br>
+      至于那个格子里此刻放的是本地实现还是远程实现，<b>它不知道，也不需要知道</b>。
+    </div>
+  </div>
+
+  <div class="ask">
+    <strong>留给你对比的两个名字：</strong><br>
+    提供 fs 的那个插件，包名是 <code>@deepseek-ai/dsh-fs-local</code>。<br>
+    它登记到 ctx 上的格子名，是 <code>fs</code>。<br><br>
+    <b>这两个是同一个吗？如果不是，说明"插件名"和"服务名"是什么关系？</b>
+  </div>
+</div>
+</body>
+</html>

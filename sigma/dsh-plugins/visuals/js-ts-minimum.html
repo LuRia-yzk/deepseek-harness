@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>读 dsh 代码所需的 JS/TS 最小语法</title>
+<style>
+  :root {
+    --bg: #08080c;
+    --surface: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.06);
+    --text: #ededef;
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-tertiary: rgba(255,255,255,0.3);
+    --accent-1: #f59e0b;
+    --accent-2: #ef4444;
+    --accent-gradient: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --green: #34d399;
+    --blue: #7dd3fc;
+    --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+    --font-sans: -apple-system, 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 20px 80px;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-sans); line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(700px 420px at 8% -4%, rgba(245,158,11,0.13), transparent 70%),
+      radial-gradient(560px 380px at 94% 6%, rgba(239,68,68,0.09), transparent 70%);
+  }
+  .wrap { max-width: 760px; margin: 0 auto; position: relative; }
+  h1 {
+    font-size: 26px; margin: 0 0 8px; letter-spacing: -0.02em;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { color: var(--text-tertiary); font-size: 13px; font-family: var(--font-mono); margin-bottom: 12px; }
+  .toc { font-size: 13px; color: var(--text-secondary); border-left: 2px solid var(--accent-1); padding-left: 14px; margin-bottom: 36px; line-height: 2; }
+  .toc b { color: var(--text); }
+  h2 {
+    font-size: 17px; margin: 44px 0 6px; font-weight: 600;
+    padding-top: 18px; border-top: 1px solid var(--border);
+  }
+  h2 .n { color: var(--accent-1); font-family: var(--font-mono); font-size: 13px; margin-right: 10px; }
+  h2 .hit { font-size: 11px; font-family: var(--font-mono); color: var(--red, #f87171); border: 1px solid rgba(248,113,113,0.4); border-radius: 999px; padding: 1px 8px; margin-left: 8px; vertical-align: middle; }
+  h3 { font-size: 13.5px; margin: 20px 0 8px; color: var(--text-secondary); font-weight: 500; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px; backdrop-filter: blur(12px); margin-bottom: 12px;
+  }
+  pre { margin: 0; font-family: var(--font-mono); font-size: 13px; overflow-x: auto; line-height: 1.9; }
+  code { font-family: var(--font-mono); }
+  .kw { color: #f472b6; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cls { color: #fbbf24; }
+  .ty { color: #c4b5fd; }
+  .cmt { color: rgba(255,255,255,0.3); font-style: italic; }
+  .note {
+    border-left: 2px solid var(--accent-1);
+    padding: 1px 0 1px 14px; margin-top: 12px;
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .dsh {
+    border-left: 2px solid var(--green);
+    padding: 1px 0 1px 14px; margin-top: 8px;
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .dsh b { color: var(--green); font-family: var(--font-mono); font-size: 12.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td, th { padding: 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { color: var(--text-tertiary); font-weight: 500; font-size: 12px; }
+  tr:last-child td { border-bottom: none; }
+  .out { color: var(--text-tertiary); font-size: 12.5px; font-family: var(--font-mono); }
+  @media (max-width: 480px) {
+    body { padding: 28px 14px 60px; }
+    h1 { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>读 dsh 代码所需的 JS/TS 最小语法</h1>
+  <p class="sub">只讲这个仓库里真正会出现的东西。每个概念配一个最小例子 + 一句"在 dsh 里长这样"。</p>
+  <div class="toc">
+    <b>01</b> 模块：import / export &nbsp;·&nbsp; <b>02</b> 函数的三种写法 &nbsp;·&nbsp; <b>03</b> 造函数 ≠ 调用函数<br>
+    <b>04</b> 类：class / extends / super / new &nbsp;·&nbsp; <b>05</b> abstract 与 implements &nbsp;·&nbsp; <b>06</b> 类 vs 对象<br>
+    <b>07</b> 类型标注、interface、泛型 &nbsp;·&nbsp; <b>08</b> async / await &nbsp;·&nbsp; <b>09</b> 对象、点、解构<br>
+    <b>10</b> 几个高频小符号
+  </div>
+
+  <h2><span class="n">01</span>模块：import / export</h2>
+  <div class="card">
+    <h3>具名导出：名字由「导出方」定死</h3>
+    <pre><code><span class="cmt">// a.ts</span>
+<span class="kw">export const</span> name = <span class="str">'sigema'</span>
+<span class="kw">export function</span> <span class="fn">apply</span>() {}
+
+<span class="cmt">// b.ts —— 必须用同一个名字</span>
+<span class="kw">import</span> { name, apply } <span class="kw">from</span> <span class="str">'./a.ts'</span></code></pre>
+    <h3>默认导出：名字由「导入方」随便起</h3>
+    <pre><code><span class="cmt">// a.ts</span>
+<span class="kw">export default class</span> <span class="cls">Foo</span> {}
+
+<span class="cmt">// b.ts —— 叫什么都行</span>
+<span class="kw">import</span> 爱叫啥叫啥 <span class="kw">from</span> <span class="str">'./a.ts'</span></code></pre>
+    <h3><code>import type</code>：只借"类型说明书"，运行时不存在</h3>
+    <pre><code><span class="kw">import type</span> { Context } <span class="kw">from</span> <span class="str">'@deepseek-ai/cordis'</span>
+<span class="cmt">// 编译后被整个删掉，不能拿来调用任何东西</span></code></pre>
+    <div class="note">
+      看到 <code>type</code> 这个词 = <b>运行时不存在</b>。<br>
+      <code>import type {} from '...'</code>（空的大括号 + type）是 DSH 常用的技巧：只为了触发声明合并，一行东西都不引入。
+    </div>
+    <div class="dsh">在 dsh 里 → <b>edit.ts</b> 只 <code>import type</code> 了 fs，实现是用 <code>ctx.fs</code> 取的。</div>
+  </div>
+
+  <h2><span class="n">02</span>函数的三种写法</h2>
+  <div class="card">
+    <pre><code><span class="cmt">// ① 声明式</span>
+<span class="kw">function</span> <span class="fn">打招呼</span>(名字) { <span class="kw">return</span> <span class="str">'你好，'</span> + 名字 }
+
+<span class="cmt">// ② 箭头函数（更短，最常见）</span>
+<span class="kw">const</span> 打招呼 = (名字) => { <span class="kw">return</span> <span class="str">'你好，'</span> + 名字 }
+
+<span class="cmt">// ②b 只有一句 return 时还能再省</span>
+<span class="kw">const</span> 打招呼 = (名字) => <span class="str">'你好，'</span> + 名字
+
+<span class="cmt">// ③ 对象/类上的方法</span>
+<span class="kw">class</span> <span class="cls">问候器</span> {
+  <span class="fn">打招呼</span>(名字) { <span class="kw">return</span> <span class="str">'你好，'</span> + 名字 }
+}</code></pre>
+    <div class="note">
+      <code>() =&gt; { ... }</code> 里那个空括号 = <b>不收参数</b>。整体意思是"一个被调用时才会执行的函数"。<br>
+      参数标注类型的写法是 <code>名字<span class="ty">: 类型</span></code>，例如 <code>(ctx<span class="ty">: Context</span>)</code>。
+    </div>
+    <div class="dsh">在 dsh 里 → <b>apply.ts</b> 有 <code>() =&gt; ctx.typertGateway.registerRemoteEvents(...)</code>：一个不收参数、调用时才执行的函数。</div>
+  </div>
+
+  <h2><span class="n">03</span>造函数 ≠ 调用函数<span class="hit">你踩过</span></h2>
+  <div class="card">
+    <pre><code><span class="kw">function</span> <span class="fn">登记</span>() {
+  console.log(<span class="str">'我登记了！'</span>)
+  <span class="kw">return</span> () => { console.log(<span class="str">'我取消了！'</span>) }   <span class="cmt">// 只是"造"一个函数</span>
+}
+
+<span class="kw">const</span> 清理 = <span class="fn">登记</span>()    <span class="cmt">// 打印：我登记了！   （清理 = 那个函数）</span>
+console.log(<span class="str">'---'</span>)        <span class="cmt">// 打印：---</span>
+<span class="fn">清理</span>()                   <span class="cmt">// 打印：我取消了！   ← 加了括号才执行</span></code></pre>
+    <div class="note">
+      <b>看到 <code>() =&gt; { ... }</code> 或 <code>function () { ... }</code>，那是"造了一个函数"，不是"跑了一段代码"。</b><br>
+      它静静躺着，等着有人给它加一对括号 <code>()</code>。<br><br>
+      <code>const x = f()</code>：<b>右边先跑</b>——先调用 <code>f()</code>，再把返回值装进 <code>x</code>。
+    </div>
+    <div class="dsh">在 dsh 里 → <code>provide()</code> 里 <code>store[key] = impl</code> 是<b>真的执行</b>；紧跟的 <code>return () =&gt; { delete ... }</code> 只是<b>把清理办法交出去</b>，此刻一行都没跑。</div>
+  </div>
+
+  <h2><span class="n">04</span>类：class / extends / super / new</h2>
+  <div class="card">
+    <pre><code><span class="kw">class</span> <span class="cls">动物</span> {
+  <span class="fn">constructor</span>(名字) {        <span class="cmt">// 构造函数：new 的时候自动跑</span>
+    <span class="kw">this</span>.名字 = 名字          <span class="cmt">// this = 正在被造出来的那个对象</span>
+  }
+}
+
+<span class="kw">class</span> <span class="cls">猫</span> <span class="kw">extends</span> <span class="cls">动物</span> {       <span class="cmt">// 继承：猫 = 动物 + 补充</span>
+  <span class="fn">constructor</span>() {
+    <span class="kw">super</span>(<span class="str">'猫'</span>)               <span class="cmt">// 调用父类的构造函数，把 '猫' 传上去</span>
+  }
+}
+
+<span class="kw">const</span> a = <span class="kw">new</span> <span class="cls">猫</span>()            <span class="cmt">// new = 用模具造一个对象</span>
+</code></pre>
+    <table style="margin-top:12px">
+      <tr><th>词</th><th>意思</th></tr>
+      <tr><td><code>class</code></td><td>定义一个<b>类</b>（模具）</td></tr>
+      <tr><td><code>extends</code></td><td>继承——<b>只发生在类与类之间</b>，没有"继承一个对象"</td></tr>
+      <tr><td><code>super(...)</code></td><td><b>语言关键字</b>（不定义在任何文件里）：调用父类的构造函数</td></tr>
+      <tr><td><code>new X(...)</code></td><td>用 <code>X</code> 这个模具<b>造一个对象</b>。<code>new</code> 后面跟的是类，不是"对象的名字"</td></tr>
+      <tr><td><code>this</code></td><td>正在被造出来的那个对象自己</td></tr>
+    </table>
+    <div class="dsh">在 dsh 里 → <code>class FileSystem extends Service</code> + <code>super(ctx, 'fs')</code>：<code>Service</code> 的构造函数里写着登记代码，所以只有它的子类登记得了。</div>
+  </div>
+
+  <h2><span class="n">05</span>abstract 与 implements</h2>
+  <div class="card">
+    <pre><code><span class="kw">interface</span> <span class="ty">可打招呼</span> {                      <span class="cmt">// 接口：一份"要求清单"（纯类型）</span>
+  <span class="fn">打招呼</span>(名字: <span class="ty">string</span>): <span class="ty">string</span>
+}
+
+<span class="kw">abstract class</span> <span class="cls">文件系统</span> {              <span class="cmt">// 抽象类：只有说明书，不能 new</span>
+  <span class="kw">abstract</span> <span class="fn">读文件</span>(路径: <span class="ty">string</span>): <span class="ty">string</span>  <span class="cmt">// 只写"必须有什么"，不写"怎么做"</span>
+}
+
+<span class="kw">class</span> <span class="cls">本地文件系统</span> <span class="kw">extends</span> <span class="cls">文件系统</span> <span class="kw">implements</span> <span class="ty">可打招呼</span> {
+  <span class="fn">读文件</span>(路径) { <span class="kw">return</span> <span class="str">'真的去读'</span> }
+  <span class="fn">打招呼</span>(名字) { <span class="kw">return</span> <span class="str">'你好'</span> }
+}</code></pre>
+    <div class="note">
+      <code>abstract</code> = "半成品模具，不许直接 <code>new</code>"。<br>
+      <code>implements X</code> = "我承诺满足接口 <code>X</code> 的所有要求"——<b>纯给编译器检查用，编译后消失</b>。
+    </div>
+  </div>
+
+  <h2><span class="n">06</span>类 vs 对象</h2>
+  <div class="card">
+    <table>
+      <tr><th></th><th>类</th><th>对象</th></tr>
+      <tr><td>是什么</td><td>模具、图纸</td><td>模具压出来的产品</td></tr>
+      <tr><td>住在哪</td><td>源码里（<code>.ts</code> 文件）</td><td>内存里（跑起来才有）</td></tr>
+      <tr><td>有几个</td><td>写一次就一个</td><td>想要几个造几个</td></tr>
+      <tr><td>怎么来</td><td><code>class X { }</code></td><td><code>new X()</code></td></tr>
+      <tr><td>有名字吗</td><td>有（类名，给人看）</td><td><b>默认没有</b>，得被变量或容器接住</td></tr>
+    </table>
+    <div class="note">
+      <b>对象 = 一堆数据 + 一堆方法，打包在一起。</b><br>
+      对象身上的数据叫<b>属性</b>（<code>obj.name</code>），身上的函数叫<b>方法</b>（<code>obj.editText()</code>）。
+    </div>
+  </div>
+
+  <h2><span class="n">07</span>类型标注、interface、泛型</h2>
+  <div class="card">
+    <pre><code><span class="cmt">// 名字: 类型      —— 冒号后面永远是"类型"，不是变量名</span>
+<span class="kw">function</span> <span class="fn">apply</span>(ctx<span class="ty">: Context</span>, config<span class="ty">: Config</span>)<span class="ty">: void</span> {}
+
+<span class="kw">interface</span> <span class="ty">Config</span> {          <span class="cmt">// 定义一份"对象的形状"</span>
+  cwd?: <span class="ty">string</span>              <span class="cmt">// ? = 可选</span>
+}
+
+<span class="kw">type</span> <span class="ty">Name</span> = <span class="ty">string</span>          <span class="cmt">// 给类型起个别名
+
+// 泛型：类型也是参数
+</span><span class="kw">class</span> <span class="cls">Store</span>&lt;<span class="ty">T</span>&gt; { get(): <span class="ty">T</span> }
+<span class="kw">const</span> s = <span class="kw">new</span> <span class="cls">Store</span>&lt;<span class="ty">string</span>&gt;()</code></pre>
+    <div class="note">
+      全部 <b>只在编译期存在</b>。运行时这些标注<b>一个都不剩</b>——所以类型写错只会在编辑器/编译时报错，不会让程序运行时崩。
+    </div>
+    <div class="dsh">在 dsh 里 → <code>Service&lt;out T = never&gt;</code>、<code>Dict&lt;Impl, symbol&gt;</code>、<code>Config?: string</code> 里的 <code>?</code>（可选）。</div>
+  </div>
+
+  <h2><span class="n">08</span>async / await / Promise</h2>
+  <div class="card">
+    <pre><code><span class="kw">async function</span> <span class="fn">读文件</span>() {          <span class="cmt">// async = 这个函数"要等"</span>
+  <span class="kw">const</span> 内容 = <span class="kw">await</span> <span class="fn">异步操作</span>()   <span class="cmt">// await = 在这儿等结果，等到了再往下走</span>
+  <span class="kw">return</span> 内容
+}
+
+<span class="cmt">// 调用 async 函数，拿到的是一个 Promise（"将来会有结果"的凭据）</span>
+<span class="kw">const</span> p = <span class="fn">读文件</span>()</code></pre>
+    <div class="note">
+      <b>Promise</b> = "现在还没有，将来会有的东西"。<br>
+      <b>await</b> = 在那儿等它兑现。<b>async</b> = 声明"我里面会 await"。<br>
+      <code>() =&gt; Promise&lt;void&gt;</code> 读作"一个返回 Promise 的函数"——DSH 里的 disposer 常常长这样。
+    </div>
+    <div class="dsh">在 dsh 里 → <code>registerRemoteEvents(...): () =&gt; Promise&lt;void&gt;</code>：它返回的清理函数是异步的（清理要等后台任务真的停）。</div>
+  </div>
+
+  <h2><span class="n">09</span>对象、点、解构</h2>
+  <div class="card">
+    <pre><code><span class="kw">const</span> 人 = { 名字: <span class="str">'小明'</span>, 年龄: <span class="num">18</span> }   <span class="cmt">// {} = 造一个对象（也是字典）</span>
+
+人.名字                <span class="cmt">// 点：按名字取属性</span>
+人[<span class="str">'名字'</span>]            <span class="cmt">// 方括号：按"字符串键"取 —— 和点是一个意思</span>
+
+<span class="kw">const</span> { 名字, 年龄 } = 人      <span class="cmt">// 解构：把属性拆进变量</span>
+<span class="kw">const</span> [第一, 第二] = 数组      <span class="cmt">// 数组按位置拆</span>
+
+<span class="kw">const</span> { a = <span class="num">1</span> } = obj          <span class="cmt">// 默认值：没有就用 1</span></code></pre>
+    <div class="note">
+      <b>JS 的对象就是一本字典</b>（键是字符串，值是任何东西）。<br>
+      所以 <code>ctx.fs</code> 和 <code>ctx['fs']</code> <b>完全等价</b>——一个是语法糖，一个是原形。
+    </div>
+    <div class="dsh">在 dsh 里 → <code>ctx.fs.editText(...)</code> 读作：从 <code>ctx</code> 取属性 <code>fs</code>（拿到一个<b>对象</b>）→ 从那个对象取属性 <code>editText</code>（拿到一个<b>函数</b>）→ 调用它。<b>两个点 = 两次取属性。</b></div>
+  </div>
+
+  <h2><span class="n">10</span>几个高频小符号</h2>
+  <div class="card">
+    <table>
+      <tr><th>符号</th><th>名字</th><th>意思</th></tr>
+      <tr><td><code>?.</code></td><td>可选链</td><td><code>a?.b</code> —— a 是空的就返回空，不报错</td></tr>
+      <tr><td><code>??</code></td><td>空值合并</td><td><code>a ?? b</code> —— a 是空的就用 b</td></tr>
+      <tr><td><code>??=</code></td><td>空值赋值</td><td><code>a ??= b</code> —— a 是空的就赋成 b</td></tr>
+      <tr><td><code>...</code></td><td>展开 / 收集</td><td><code>{ ...a, b: 1 }</code> 复制 a 再加一项</td></tr>
+      <tr><td><code>=&gt;</code></td><td>箭头</td><td>定义函数</td></tr>
+      <tr><td><code>;</code></td><td>分号</td><td><b>可以省略</b>，JS 会自动补。dsh 仓库的风格是<b>一律不写</b></td></tr>
+      <tr><td><code>//</code> <code>/* */</code></td><td>注释</td><td>和 C 一样</td></tr>
+      <tr><td><code>/** */</code></td><td>JSDoc</td><td>写在声明上方的说明块，dsh 每个模块和导出都有</td></tr>
+    </table>
+    <div class="dsh">在 dsh 里 → <code>name ??= this.constructor['provide']</code> 读作："如果 name 是空的，就用类上那个 provide 字段"。</div>
+  </div>
+
+  <h2><span class="n">附</span>一张速查卡</h2>
+  <div class="card">
+    <table>
+      <tr><th>你看到</th><th>读作</th></tr>
+      <tr><td><code>import type { X }</code></td><td>只借类型，运行时不存在</td></tr>
+      <tr><td><code>export default X</code></td><td>这个模块的"默认出口"是 X，导入方随便起名</td></tr>
+      <tr><td><code>() =&gt; { ... }</code></td><td>"造一个函数"——不是执行</td></tr>
+      <tr><td><code>f()</code></td><td>调用（加了括号才跑）</td></tr>
+      <tr><td><code>class X extends Y</code></td><td>类 X 继承类 Y（类与类之间）</td></tr>
+      <tr><td><code>super(a, b)</code></td><td>调用父类的构造函数</td></tr>
+      <tr><td><code>new X(a)</code></td><td>用类 X 造一个对象</td></tr>
+      <tr><td><code>abstract</code></td><td>半成品模具，不许 new</td></tr>
+      <tr><td><code>implements X</code></td><td>承诺满足接口 X（编译期检查，运行时消失）</td></tr>
+      <tr><td><code>名字: 类型</code></td><td>冒号后面永远是类型</td></tr>
+      <tr><td><code>a.b.c(...)</code></td><td>取属性 → 取属性 → 调用。两个点 = 两次取属性</td></tr>
+      <tr><td><code>async</code> / <code>await</code></td><td>要等的函数 / 在这儿等</td></tr>
+    </table>
+  </div>
+</div>
+</body>
+</html>

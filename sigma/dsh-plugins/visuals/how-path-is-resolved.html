@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>目录是怎么确定的</title>
+<style>
+  :root {
+    --bg: #08080c;
+    --surface: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.06);
+    --text: #ededef;
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-tertiary: rgba(255,255,255,0.3);
+    --accent-1: #f59e0b;
+    --accent-2: #ef4444;
+    --accent-gradient: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --green: #34d399;
+    --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+    --font-sans: -apple-system, 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 20px 80px;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-sans); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(660px 400px at 8% -4%, rgba(245,158,11,0.12), transparent 70%),
+      radial-gradient(560px 380px at 94% 8%, rgba(239,68,68,0.09), transparent 70%);
+  }
+  .wrap { max-width: 720px; margin: 0 auto; position: relative; }
+  h1 {
+    font-size: 25px; margin: 0 0 6px; letter-spacing: -0.02em;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { color: var(--text-tertiary); font-size: 13px; margin-bottom: 32px; font-family: var(--font-mono); }
+  h2 { font-size: 16px; margin: 36px 0 14px; font-weight: 600; }
+  h2 span { color: var(--accent-1); font-family: var(--font-mono); font-size: 13px; margin-right: 8px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px; backdrop-filter: blur(12px);
+    margin-bottom: 12px;
+  }
+  pre { margin: 0; font-family: var(--font-mono); font-size: 13.5px; overflow-x: auto; line-height: 1.9; }
+  .kw { color: #f472b6; }
+  .fn { color: #7dd3fc; }
+  .str { color: #86efac; }
+  .cmt { color: rgba(255,255,255,0.3); font-style: italic; }
+  .note {
+    border-left: 2px solid var(--accent-1);
+    padding: 2px 0 2px 14px; margin-top: 14px;
+    font-size: 13.5px; color: var(--text-secondary);
+  }
+  .steps { display: flex; flex-direction: column; gap: 14px; }
+  .step { display: flex; gap: 14px; align-items: flex-start; }
+  .stepnum {
+    flex: 0 0 26px; height: 26px; border-radius: 50%;
+    border: 1px solid rgba(245,158,11,0.5); color: var(--accent-1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-family: var(--font-mono); margin-top: 2px;
+  }
+  .steptext { font-size: 14px; }
+  .steptext b { color: var(--text); }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .env {
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+    background: rgba(255,255,255,0.025);
+  }
+  .env h3 { margin: 0 0 10px; font-size: 13px; font-family: var(--font-mono); color: var(--text-secondary); font-weight: 500; }
+  .env .kv { font-size: 13px; margin: 6px 0; }
+  .env .kv em { color: var(--text-tertiary); font-style: normal; font-family: var(--font-mono); font-size: 12px; display: block; }
+  .env code { font-family: var(--font-mono); color: var(--green); font-size: 12.5px; word-break: break-all; }
+  .punch {
+    margin-top: 36px; border: 1px solid rgba(245,158,11,0.35);
+    background: linear-gradient(180deg, rgba(245,158,11,0.07), rgba(239,68,68,0.04));
+    border-radius: var(--radius); padding: 18px 20px; font-size: 14.5px;
+  }
+  .punch strong { color: var(--accent-1); }
+  @media (max-width: 480px) {
+    body { padding: 28px 14px 60px; }
+    h1 { font-size: 20px; }
+    .split { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>目录是怎么确定的？</h1>
+  <p class="sub">你问的这个问题是真的挡路了。补上它，前面所有推理才走得通。</p>
+
+  <div class="card">
+    <pre><code><span class="cmt">// 聊天代码里唯一出现的"位置信息"</span>
+<span class="kw">const</span> text = <span class="kw">await</span> fs.<span class="fn">readText</span>(<span class="str">'notes.txt'</span>)</code></pre>
+    <div class="note">
+      注意：聊天给的是一个<b>相对路径</b> <code>'notes.txt'</code>——没有盘符，没有 <code>C:\</code>，没有 <code>/home/</code>。<br>
+      <b>相对</b>是相对于谁？这就是全部的关键。
+    </div>
+  </div>
+
+  <h2><span>01</span>三步走完</h2>
+  <div class="card steps">
+    <div class="step">
+      <div class="stepnum">1</div>
+      <div class="steptext"><b>聊天</b>只说"读 <code>notes.txt</code>"。它不说是哪台机器上的。</div>
+    </div>
+    <div class="step">
+      <div class="stepnum">2</div>
+      <div class="steptext"><b>fs 这个零件自己带着一个"根目录"</b>。这是它的<b>配置</b>，不是聊天代码给的。</div>
+    </div>
+    <div class="step">
+      <div class="stepnum">3</div>
+      <div class="steptext">实际去读的位置 = <b>根目录</b> ＋ <b>聊天给的那个相对路径</b>。</div>
+    </div>
+  </div>
+
+  <h2><span>02</span>同一行代码，两种环境</h2>
+  <div class="card">
+    <div class="split">
+      <div class="env">
+        <h3>笔记本上的那次装配</h3>
+        <div class="kv"><em>聊天说</em><code>'notes.txt'</code></div>
+        <div class="kv"><em>这份 fs 的根目录</em><code>C:\Users\你\my-project</code></div>
+        <div class="kv"><em>实际读到</em><code>C:\Users\你\my-project\notes.txt</code></div>
+      </div>
+      <div class="env">
+        <h3>服务器上的那次装配</h3>
+        <div class="kv"><em>聊天说</em><code>'notes.txt'</code></div>
+        <div class="kv"><em>这份 fs 的根目录</em><code>/workspace</code>（沙箱里）</div>
+        <div class="kv"><em>实际读到</em><code>/workspace/notes.txt</code></div>
+      </div>
+    </div>
+    <div class="note">
+      聊天代码<b>一个字都没改</b>，但它读到了两台不同机器上的文件。<br>
+      因为"根目录"这件事是<b>那份 fs 实现自己带着的</b>，跟聊天没关系。
+    </div>
+  </div>
+
+  <div class="punch">
+    <strong>所以要记住的三件事：</strong><br>
+    ① 目录 <b>不是</b> fs 决定的，也 <b>不是</b> 聊天决定的——是 <b>fs 那份实现的配置</b> 决定的。<br>
+    ② 目录是"被操作的对象"，fs 是"操作者"。两者是分开的两件事。<br>
+    ③ 因此换掉 fs 的实现，也就换掉了"哪台机器上的文件"——但聊天代码不需要知道这件事。
+  </div>
+</div>
+</body>
+</html>
