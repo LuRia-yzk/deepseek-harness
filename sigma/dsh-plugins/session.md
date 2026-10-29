@@ -501,3 +501,14 @@
   - 两个待解点：注册顺序（registry 注册时不发事件，只能等 `list()` 出现目标）、默认预设指向
   - 决定：今晚保留快照方案；**明天当作第 12 站「写插件 → 挂载 → 运行」的实战项目**
 - **待办（下次第一件事）**：搭 `win-bash-shell` 插件骨架（读 `readDocument` → 改两行 → `register` 派生），学习者填逻辑；之后回补第 10 站重建
+- 2026-10-28T16:05 **恢复（13h26m）**。今日主线：第 12 站实战（写插件 → 挂载 → 运行）
+  - 书写热身（三行带字符串）：引号 **8 个 4 对全对**（第二次干净）；`apply` 的参数列表与函数体混写三轮未过，最后改填空才拆开 → **降载在书写卡点上有效，硬问无效**
+  - 地基复检（换变体）：`ctx.on` 登记之后"什么时候打印" → 首答「调用 apply 时」✗ → 给 C 函数指针骨架，他明确说「**看不懂，别用 C 了**」→ 改用「**存号码 / 按拨号键**」类比 → 答「ctx.emit」✓
+    - **画像修正：C 类比不是万能的——涉及函数指针/数组下标那种 C 他会直接拒绝。今后 C 骨架只用到变量 + 赋值 + 调用为止。**
+  - 第 12 站开工：`inject: ['loader','agentPresets']` → `[...ctx.loader.entries()].find(e => e.options?.config?.id === 'standard')` → 浅拷贝 `rows` → 翻 `tool-bash/tool-pwsh` 两行 → `agentPresets.register({ id: 'standard-bash', name: '标准（bash）', plugins: rows })`
+  - 填空诊断：`inject` 两个服务名答对（`agentperset` 拼写漏大小写）；布尔值答对（`ture` 拼错）；⑤ 连答 `.map`、`row` —— **又把动作/单数当成名字**（第二号模式），指出 `rows` 多一个 s 后通过
+  - 插件落位：`~/.dsh/profiles/desktop/plugins/dsh-win-bash-shell/`（package.json + index.js，**纯 ESM JS，无构建**）
+  - 挂载：profile `node_modules` 下建链接 + `cordis.patch.yml` 末尾 `- insert: [{ id: win-bash-shell, name: dsh-win-bash-shell }]`；改前备份 `.bak-before-plugin`；用 js-yaml（挂自定义 `!!js` 类型）验证顶层 12 条合法
+  - **验证通过：GUI 预设选择器出现「标准（bash）」✓**，热加载生效，未重启 App
+  - 顺带核清两个概念：`app.asar` 里是**编译后的 JS 不是二进制**（抽出 rc.3 的 registry 与 alpha.2 对比，API 一致）；**昨天改的是 YAML 不是 JS**
+  - 待办：① 用「标准（bash）」新建会话验证 bash 真可用 ② 通过后拆掉三份快照 ③ 回补第 10 站重建
