@@ -202,24 +202,24 @@
 
   <footer>
     <div class="fbar"><i id="footerBar"></i></div>
-    <div class="fmeta"><span id="footerLeft">0 / 14 已掌握</span><span>最后更新 2026-10-18 23:40</span></div>
+    <div class="fmeta"><span id="footerLeft">0 / 14 已掌握</span><span>最后更新 2026-11-15 21:30</span></div>
   </footer>
 </div>
 
 <script>
 const concepts = [
-  { n: 1,  title: 'dsh 是一棵插件树（没有特权内核）', pre: '起点 · 2026-10-18 复习：4 轮脚手架后自主收口 · 间隔 4d', status: 'mastered', score: 100 },
-  { n: 2,  title: 'Context（ctx）：服务容器', pre: '依赖 1 · 2026-10-19 复习通过 · 间隔 4d', status: 'mastered', score: 100 },
-  { n: 3,  title: 'Plugin 的两种形态与最小插件', pre: '依赖 2 · 2026-10-19 复习：形态判据 ✓ · 混淆"用 ctx"与"占格子" · 间隔 2d', status: 'mastered', score: 100 },
-  { n: 4,  title: 'inject：依赖声明决定启动顺序', pre: '依赖 3 · 2026-10-19 复习通过（重启时机一度答错，靠自身前提自行收回）· 间隔 2d', status: 'mastered', score: 100 },
-  { n: 5,  title: 'ctx.effect()：注册即可逆副作用', pre: '依赖 3 · 2026-10-19 复习通过（中途重补"造函数≠调用函数"）· 间隔 2d', status: 'mastered', score: 100 },
-  { n: 6,  title: '类型化事件与声明合并', pre: '依赖 3 · 2026-10-20 掌握 · 4/4（C 版分发器焊死运行时那一层）· 间隔 1d', status: 'mastered', score: 100 },
-  { n: 7,  title: '五种分发模式（waterfall 的 next 契约）', pre: '依赖 6 · 2026-10-20 掌握 · 4/4（next = 交棒；不调即短路）· 间隔 1d', status: 'mastered', score: 100 },
-  { n: 8,  title: 'Config：插件的配置契约', pre: '依赖 3 · 2026-10-23 掌握（概念全通；书写单列训练）· 间隔 2d', status: 'mastered', score: 100 },
-  { n: 9,  title: 'Profile：插件树如何被组装', pre: '依赖 1, 4 · 2026-10-22 掌握 · 4/4（空起点 = 一切皆插件）· 间隔 1d', status: 'mastered', score: 100 },
-  { n: 10, title: '组合包 bundle 与 package.json 的 dsh 字段', pre: '依赖 9 · 2026-10-23 自评"发虚"→复查 3/4 = 75%，待复检', status: 'in-progress', score: 75 },
-  { n: 11, title: 'cordis.yml 与有序 patch 层叠', pre: '依赖 8, 10', status: 'not-started', score: null },
-  { n: 12, title: '动手：写插件 → 配置 → 挂载运行', pre: '依赖 3, 4, 5, 8, 11', status: 'not-started', score: null },
+  { n: 1,  title: 'dsh 是一棵插件树（没有特权内核）', pre: '起点 · 11-08 复习：import 换不来本事（脚手架后才想起）· 间隔 2d', status: 'mastered', score: 100 },
+  { n: 2,  title: 'Context（ctx）：服务容器', pre: '依赖 1 · 11-08 复习：同名冲突靠教；换实现 = 改清单 · 间隔 2d', status: 'mastered', score: 100 },
+  { n: 3,  title: 'Plugin 的两种形态与最小插件', pre: '依赖 2 · 11-01 复习：两问干净，误解 #6 resolved · 间隔 4d', status: 'mastered', score: 100 },
+  { n: 4,  title: 'inject：依赖声明决定启动顺序', pre: '依赖 3 · 11-01 复习：卸载链条问 4 次才到（账本在插件自己的 ctx）· 间隔 2d', status: 'mastered', score: 100 },
+  { n: 5,  title: 'ctx.effect()：注册即可逆副作用', pre: '依赖 3 · 11-01 复习：真实 API 已纠正（ctx.clock 不存在）· 间隔 4d', status: 'mastered', score: 100 },
+  { n: 6,  title: '类型化事件与声明合并', pre: '依赖 3 · 11-08 复习：两本簿子 7 天未掉 · 间隔 2d', status: 'mastered', score: 100 },
+  { n: 7,  title: '五种分发模式（waterfall 的 next 契约）', pre: '依赖 6 · 11-08 复习：return 又被当顺序开关，靠最小例拆开 · 间隔 1d', status: 'mastered', score: 100 },
+  { n: 8,  title: 'Config：插件的配置契约', pre: '依赖 3 · 11-01 复习：YAML 与 TS 边界又混，靠讲回立住 · 间隔 2d', status: 'mastered', score: 100 },
+  { n: 9,  title: 'Profile：插件树如何被组装', pre: '依赖 1, 4 · 11-08 复习：调换 bundle 顺序 → 最后贴的赢 · 间隔 2d', status: 'mastered', score: 100 },
+  { n: 10, title: '组合包 bundle 与 package.json 的 dsh 字段', pre: '依赖 9 · 11-15 重建通过 4/4（三身份 + 点名判据）· 间隔 1d', status: 'mastered', score: 100 },
+  { n: 11, title: 'cordis.yml 与有序 patch 层叠', pre: '依赖 8, 10 · 10-27 换 shell 时已用到（config 整键替换坑），未正式判分', status: 'not-started', score: null },
+  { n: 12, title: '动手：写插件 → 配置 → 挂载运行', pre: '依赖 3,4,5,8,11 · 10-28 已写出 win-bash-shell 并挂载，GUI 出现「标准（bash）」· 待真机验证', status: 'in-progress', score: null },
   { n: 13, title: '事件域：session / agent / 能力事件', pre: '依赖 6, 7, 12', status: 'not-started', score: null },
   { n: 14, title: '能力 seam 三角与替换提供方', pre: '依赖 2, 13', status: 'not-started', score: null }
 ];

@@ -90,79 +90,68 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>9 / 14：树是拼出来的</h1>
-  <div class="sub">2026-10-22 13:15–14:12 ／ 第 08 站复检（75%）＋ 第 09 站通过</div>
+  <h1>第 10 站结案：三个身份终于分开</h1>
+  <div class="sub">2026-11-15 21:00–21:35 ／ 第 10 站重建（4/4）／ 距上次 7d6h</div>
 
-  <h2>进度</h2>
+  <h2>这轮的数字</h2>
   <div class="grid">
     <div class="card">
-      <div class="stat-num green">9 / 14</div>
+      <div class="stat-num green">10 / 14</div>
       <div class="stat-label">已掌握概念</div>
-      <div class="stat-note">08 站已掌握；09 站 4/4；10 站 75% 待复检</div>
+      <div class="stat-note">两周的悬案今天结案；剩下的 11、12、13、14 都在后半段</div>
     </div>
     <div class="card">
-      <div class="stat-num amber">3</div>
-      <div class="stat-label">你抓出我的漏洞</div>
-      <div class="stat-note">漏自评 · 漏验书写 · 报错路径（其中一次是事实错误）</div>
+      <div class="stat-num amber">4 / 4</div>
+      <div class="stat-label">第 10 站量规</div>
+      <div class="stat-note">准确 · 有解释 · 新颖应用 · 辨别 —— 全部达标</div>
     </div>
   </div>
 
-  <h2>概念进度</h2>
-  <div class="card bars">
-    <div class="brow"><div><span class="bname">01 dsh 是一棵插件树</span><span class="bmeta">间隔 4d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
-    <div class="brow"><div><span class="bname">02 Context（ctx）：服务容器</span><span class="bmeta">间隔 4d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
-    <div class="brow"><div><span class="bname">03 Plugin 的两种形态</span><span class="bmeta">间隔 2d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
-    <div class="brow"><div><span class="bname">04 inject：依赖决定启动顺序</span><span class="bmeta">间隔 2d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
-    <div class="brow"><div><span class="bname">05 ctx.effect()：可逆副作用</span><span class="bmeta">间隔 2d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
-    <div class="brow"><div><span class="bname">06 类型化事件与声明合并</span><span class="bmeta">间隔 1d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
-    <div class="brow"><div><span class="bname">07 五种分发模式（waterfall）</span><span class="bmeta">间隔 1d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
-    <div class="brow"><div><span class="bname">08 Config：插件的配置契约</span><span class="bmeta">10-23 掌握 · 书写另立训练项</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
-    <div class="brow"><div><span class="bname">09 Profile：插件树如何被组装</span><span class="bmeta">10-22 掌握 · 间隔 1d</span><div class="btrack done"><i style="width:100%"></i></div></div><div class="bval">100%</div></div>
-    <div class="brow"><div><span class="bname">10 组合包 bundle 与 dsh 字段</span><span class="bmeta">自评"发虚"→复查 75%，待复检</span><div class="btrack wip"><i style="width:75%"></i></div></div><div class="bval">75%</div></div>
+  <h2>一个包，三个身份</h2>
+  <div class="card">
+    <table class="two">
+      <tr><th>身份</th><th>由什么决定</th><th>管什么</th></tr>
+      <tr><td>npm 包</td><td><code>package.json</code> 的 <code>name</code></td><td>能被安装</td></tr>
+      <tr><td><b>bundle</b></td><td><code>dsh.bundle.patch</code>（<b>字段</b>，不是文件）</td><td>贡献哪几份清单、按什么顺序贴</td></tr>
+      <tr><td><b>插件</b></td><td>树里<b>有没有一行 <code>name</code> 点名它</b></td><td>跑不跑</td></tr>
+    </table>
+    <div class="quote"><b>跑不跑只看有没有被点名，而那一行可以就写在它自己贡献的清单里。</b> —— <code>dsh-web-app</code> 就是在自己的 patch 第 190 行点了自己。</div>
   </div>
 
-  <h2>第 09 站：树是怎么拼出来的</h2>
+  <h2>上次我错在哪</h2>
   <div class="card">
-    <pre class="code">[]                          <span class="c"># cordis.yml —— 空，故意的</span>
-  ↓ dsh-base 自带的 patch
-  ↓ dsh-web-app 自带的 5 份 patch
-  ↓ voice-input 自带的 patch
-  ↓ 你自己的 cordis.patch.yml <span class="c">← 最后贴，所以它说了算</span>
-  = 一棵几百个插件的树</pre>
     <ul>
-      <li><b>从空开始不是省略，是承诺。</b>你自己的话：「要保证 dsh 一切皆插件，所以该文件是空的」——第 01 站和第 09 站在这里接上了。</li>
-      <li><b>特权的定义：</b>不是"改不改得动"，是"不点名时在不在"。空清单让所有插件都必须被点名。</li>
-      <li><b>后贴的覆盖先贴的</b>（跟 C 的 <code>x = 1; x = 2;</code> 同性质）。所以别改安装目录里那份——升级就没了。</li>
+      <li>10-27 我断言「bundle 的清单从没点过自己」，据此判你答错。</li>
+      <li>实际：<code>cordis.patch.yml:161</code> 点 <code>dsh-web-app/startup</code>、<code>:190</code> 点 <code>dsh-web-app</code> 自己。</li>
+      <li>所以那一站的材料作废、白等了两周。今天重讲，从 <code>package.json</code> 的 <code>dsh</code> 字段重新推，你两问就到位了。</li>
     </ul>
   </div>
 
-  <h2>08 和 09 在这里合上了</h2>
+  <h2>今天两个新信号</h2>
   <div class="card">
     <ul>
-      <li><code>cordis.patch.yml</code> 是 <b>YAML</b>，TS 的类型检查看不见它。</li>
-      <li>那里面每个 <code>config:</code> 块的唯一关口，是那个插件导出的 <b><code>Config</code> schema</b>。</li>
-      <li>schema 不是表，是<b>校验器</b>：能被调用，干三件事——查类型范围、补默认值、产出干净配置。<code>apply</code> 拿到的是<b>成品</b>。</li>
-      <li>没有 <code>Config</code> = 没有校验器 = <b>静默</b>（跟"没人监听就不报错"同一个形状）。</li>
+      <li><b>你第一次自评「扎实」，并且和量规一致。</b>此前两次说"发虚"也都准 —— 你的自评现在可以当证据用了。</li>
+      <li><b>三次 <code>【猜】</code> 全部猜对。</b>这说明标签测的是把握度，不是正确率：<b>猜对不等于会</b>，下次照样得问"凭什么"。</li>
     </ul>
-    <div class="quote">一句话：<b>类型管代码，schema 管配置，谁都不管的东西就静默通过。</b></div>
   </div>
 
   <h2>还欠着的</h2>
   <div class="card">
     <table class="two">
       <tr><th>欠账</th><th>说明</th></tr>
-      <tr><td>第 08 站书写复测</td><td>写一次完整的 <code>Config</code> + <code>apply(ctx, config)</code>，不加提示</td></tr>
-      <tr><td>第 10 站复检</td><td>包 / 插件 / bundle 三个身份各管什么；bundle 不带自己就不跑</td></tr>
-      <tr><td>引号</td><td>第四次之后终于讲通：<code>sigema/ready</code> 不带引号 = <code>sigema ÷ ready</code>（除号）</td></tr>
-      <tr><td>第 11 站</td><td><code>cordis.yml</code> 与有序 patch 层叠</td></tr>
+      <tr><td>第 12 站收尾</td><td>新建「标准（bash）」会话，<code>echo $MSYSTEM</code> —— 插件早挂上了，就差这一下</td></tr>
+      <tr><td>03 / 04 / 05 / 08 复习</td><td>逾期 6–7 天</td></tr>
+      <tr><td>三份快照拆除</td><td>插件跑通后删掉当年手工复制的预设</td></tr>
+      <tr><td>书写训练</td><td><code>apply</code> 参数列表与函数体仍会混写</td></tr>
     </table>
   </div>
 
   <h2>下次接着做</h2>
   <div class="card next">
-    <div><span>01</span>十秒地基（每次换变体）。</div>
-    <div><span>02</span>第 08 站书写复测：不提示写完 <code>Config</code> 和 <code>apply(ctx, config)</code>。</div>
-    <div><span>03</span>第 10 站：bundle 是什么、<code>dsh</code> 字段怎么声明。</div>
+    <div><span>01</span>十秒地基（柯里化那类双括号，今天现补的语法）。</div>
+    <div><span>02</span>第 12 站真机验证 bash —— 五分钟，把实操闭合。</div>
+    <div><span>03</span>补 03 / 04 / 05 / 08 四站复习。</div>
+    <div><span>04</span>之后才谈第 11 站（<code>cordis.yml</code> 与有序 patch 层叠）。</div>
   </div>
 
   <footer>sigma · dsh-plugins · 本文件每次暂停或里程碑时重写</footer>
